@@ -317,3 +317,60 @@ def save_excel_and_csv(raw_df, cleaned_df):
     print(f"Saved Excel workbook: {excel_path}")
 
 
+# ============================================================
+# 5. LOAD INTO SQLITE DATABASE
+# ============================================================
+
+def load_into_sqlite(cleaned_df):
+    db_path = os.path.join(DB_DIR, "real_estate.db")
+    conn = sqlite3.connect(db_path)
+
+    cleaned_df.to_sql("fact_property_listing", conn, if_exists="replace", index=False)
+
+    area_summary_query = """
+    SELECT
+        Area,
+        Property_Type,
+        COUNT(*) AS total_listings,
+        ROUND(AVG(Sale_Price), 2) AS avg_sale_price,
+        ROUND(AVG(Annual_Rent), 2) AS avg_annual_rent,
+        ROUND(AVG(Rental_Yield), 2) AS avg_rental_yield
+    FROM fact_property_listing
+    GROUP BY Area, Property_Type
+    ORDER BY avg_sale_price DESC
+    """
+
+    monthly_trend_query = """
+    SELECT
+        Listing_Year,
+        Listing_Month,
+        COUNT(*) AS total_listings,
+        ROUND(AVG(Sale_Price), 2) AS avg_sale_price
+    FROM fact_property_listing
+    GROUP BY Listing_Year, Listing_Month
+    ORDER BY Listing_Year, Listing_Month
+    """
+
+    roi_query = """
+    SELECT
+        Area,
+        ROUND(AVG(Annual_Rent / Sale_Price * 100), 2) AS avg_rental_yield
+    FROM fact_property_listing
+    GROUP BY Area
+    ORDER BY avg_rental_yield DESC
+    """
+
+    area_summary_df = pd.read_sql_query(area_summary_query, conn)
+    monthly_trend_df = pd.read_sql_query(monthly_trend_query, conn)
+    roi_df = pd.read_sql_query(roi_query, conn)
+
+    area_summary_df.to_csv(os.path.join(DATA_CLEANED_DIR, "area_summary.csv"), index=False)
+    monthly_trend_df.to_csv(os.path.join(DATA_CLEANED_DIR, "monthly_market_trend.csv"), index=False)
+    roi_df.to_csv(os.path.join(DATA_CLEANED_DIR, "roi_by_area.csv"), index=False)
+
+    conn.close()
+
+    print(f"Saved SQLite DB: {db_path}")
+    print("Saved SQL output CSV files for Power BI.")
+
+
