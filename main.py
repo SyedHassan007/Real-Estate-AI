@@ -216,3 +216,73 @@ def generate_dubai_real_estate_data(n_rows=3000):
         df.loc[missing_idx, col] = np.nan
 
     return df
+
+
+
+# ============================================================
+# 3. CLEAN + FEATURE ENGINEERING
+# ============================================================
+
+def clean_and_engineer_data(df):
+    df = df.copy()
+
+    df["Listing_Date"] = pd.to_datetime(df["Listing_Date"], errors="coerce")
+
+    # Standardize text columns
+    text_cols = ["Area", "Community", "Property_Type", "Developer", "Furnished", "Handover_Status", "Agent_Name"]
+    for col in text_cols:
+        df[col] = df[col].astype(str).str.strip()
+
+    # Fill numeric nulls with median
+    numeric_cols_to_fill = ["Bathrooms", "Floor_No", "Parking_Spaces", "Service_Charges"]
+    for col in numeric_cols_to_fill:
+        df[col] = df[col].fillna(df[col].median())
+
+    # Feature engineering
+    df["Price_Per_SqFt"] = df["Sale_Price"] / df["Size_SqFt"]
+    df["Rent_Per_SqFt"] = df["Annual_Rent"] / df["Size_SqFt"]
+    df["Rental_Yield"] = (df["Annual_Rent"] / df["Sale_Price"]) * 100
+    df["Listing_Month"] = df["Listing_Date"].dt.month
+    df["Listing_Year"] = df["Listing_Date"].dt.year
+    df["Luxury_Flag"] = np.where(df["Sale_Price"] >= 2500000, 1, 0)
+    df["Premium_Location_Flag"] = np.where(
+        df["Area"].isin(["Downtown Dubai", "Palm Jumeirah", "Dubai Marina"]), 1, 0
+    )
+    df["Accessibility_Score"] = (
+        (10 - np.clip(df["Distance_To_Metro"], 0, 10)) * 0.5 +
+        (10 - np.clip(df["Distance_To_Downtown"] / 3, 0, 10)) * 0.3 +
+        np.clip(df["Nearby_Malls"], 0, 5) * 0.2
+    )
+    df["Neighborhood_Convenience_Score"] = (
+        df["Nearby_Schools"] * 0.4 +
+        df["Nearby_Malls"] * 0.6
+    )
+
+    # Investment score
+    def investment_grade(row):
+        score = 0
+        if row["Rental_Yield"] >= 6:
+            score += 2
+        elif row["Rental_Yield"] >= 4:
+            score += 1
+
+        if row["Accessibility_Score"] >= 6:
+            score += 1
+
+        if row["Premium_Location_Flag"] == 1:
+            score += 1
+
+        if row["Service_Charges"] < 50000:
+            score += 1
+
+        if score >= 4:
+            return "High"
+        elif score >= 2:
+            return "Medium"
+        else:
+            return "Low"
+
+    df["Investment_Grade"] = df.apply(investment_grade, axis=1)
+
+    return df
+
