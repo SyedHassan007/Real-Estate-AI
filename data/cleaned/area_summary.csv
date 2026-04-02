@@ -1,0 +1,51 @@
+Area,Property_Type,total_listings,avg_sale_price,avg_annual_rent,avg_rental_yield
+Palm Jumeirah,Penthouse,28,26424163.84,1113341.27,4.2
+Downtown Dubai,Penthouse,24,23072843.73,988130.06,4.32
+Palm Jumeirah,Villa,46,18466063.46,772950.28,4.21
+Dubai Marina,Penthouse,34,18225815.44,781101.26,4.33
+Business Bay,Penthouse,34,17239079.9,827751.9,4.81
+Downtown Dubai,Villa,40,16465998.63,707373.16,4.32
+Dubai Hills,Penthouse,39,14113247.85,625893.97,4.46
+Dubai Marina,Villa,43,11977246.4,521083.35,4.4
+Business Bay,Villa,43,11717586.81,547080.96,4.71
+Palm Jumeirah,Townhouse,59,11670385.07,475447.03,4.12
+Dubai Hills,Villa,48,10654237.36,463270.81,4.38
+Al Furjan,Penthouse,27,9997184.77,479794.39,4.81
+JVC,Penthouse,28,9163385.98,464910.41,5.1
+Downtown Dubai,Townhouse,51,8747665.77,376158.82,4.33
+Arjan,Penthouse,27,8228574.76,420273.51,5.17
+Silicon Oasis,Penthouse,22,6970140.72,357918.42,5.18
+Dubai Marina,Townhouse,40,6923843.62,306782.89,4.45
+Al Furjan,Villa,55,6695758.26,317402.23,4.82
+Business Bay,Townhouse,38,6649773.39,322847.73,4.91
+JVC,Villa,43,6065304.44,309703.85,5.11
+Dubai Hills,Townhouse,49,5787403.13,259062.93,4.5
+International City,Penthouse,28,5691196.21,268148.84,4.74
+Arjan,Villa,47,5582769.1,280237.14,5.05
+Silicon Oasis,Villa,44,5251566.5,257929.36,4.93
+Palm Jumeirah,Apartment,130,5186127.92,214846.94,4.17
+International City,Villa,37,4214784.8,197929.89,4.74
+Downtown Dubai,Apartment,130,4182112.23,179570.74,4.34
+Al Furjan,Townhouse,51,3887186.34,187602.83,4.91
+JVC,Townhouse,51,3867716.53,192743.35,5.02
+Business Bay,Apartment,144,3393504.68,162190.77,4.79
+Dubai Marina,Apartment,125,3346870.98,146977.54,4.46
+Arjan,Townhouse,48,3335061.58,167700.81,5.07
+Silicon Oasis,Townhouse,43,3061716.53,151275.94,4.94
+Dubai Hills,Apartment,139,2994896.15,131717.54,4.43
+International City,Townhouse,42,2336519.62,110468.33,4.78
+Al Furjan,Apartment,134,2066202.32,100039.79,4.87
+JVC,Apartment,123,1929714.11,94812.26,4.96
+Arjan,Apartment,133,1666126.1,82666.02,5.02
+Silicon Oasis,Apartment,149,1499497.64,73212.25,4.92
+Palm Jumeirah,Studio,41,1473460.77,55257.41,3.76
+Downtown Dubai,Studio,48,1367487.84,55270.1,4.05
+International City,Apartment,132,1112164.89,51522.65,4.67
+Business Bay,Studio,51,1015346.59,44908.68,4.44
+Dubai Marina,Studio,35,925030.08,41034.31,4.48
+Dubai Hills,Studio,47,771345.36,31103.98,4.06
+Al Furjan,Studio,40,493269.46,22778.44,4.69
+JVC,Studio,48,466322.72,21581.01,4.75
+Arjan,Studio,50,399364.07,19357.04,5.09
+Silicon Oasis,Studio,57,321411.51,18060.16,6.03
+International City,Studio,35,230444.77,18000.0,8.26
