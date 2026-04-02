@@ -519,3 +519,50 @@ def train_model(cleaned_df):
     return results_df, predictions_df
 
 
+# ============================================================
+# 7. CREATE CHARTS
+# ============================================================
+
+def create_charts(cleaned_df, predictions_df):
+    # Chart 1: Average sale price by area
+    avg_price_by_area = cleaned_df.groupby("Area")["Sale_Price"].mean().sort_values(ascending=False)
+
+    plt.figure(figsize=(12, 6))
+    avg_price_by_area.plot(kind="bar")
+    plt.title("Average Sale Price by Area")
+    plt.xlabel("Area")
+    plt.ylabel("Average Sale Price")
+    plt.xticks(rotation=45, ha="right")
+    plt.tight_layout()
+    plt.savefig(os.path.join(OUTPUTS_DIR, "avg_sale_price_by_area.png"))
+    plt.close()
+
+    # Chart 2: Rental yield by area
+    avg_yield_by_area = cleaned_df.groupby("Area")["Rental_Yield"].mean().sort_values(ascending=False)
+
+    plt.figure(figsize=(12, 6))
+    avg_yield_by_area.plot(kind="bar")
+    plt.title("Average Rental Yield by Area")
+    plt.xlabel("Area")
+    plt.ylabel("Rental Yield (%)")
+    plt.xticks(rotation=45, ha="right")
+    plt.tight_layout()
+    plt.savefig(os.path.join(OUTPUTS_DIR, "rental_yield_by_area.png"))
+    plt.close()
+
+    # Chart 3: Actual vs predicted
+    sample_df = predictions_df.head(150).copy()
+
+    plt.figure(figsize=(10, 6))
+    plt.plot(sample_df["Actual_Sale_Price"].values, label="Actual")
+    plt.plot(sample_df["Predicted_Sale_Price"].values, label="Predicted")
+    plt.title("Actual vs Predicted Sale Price")
+    plt.xlabel("Sample Index")
+    plt.ylabel("Sale Price")
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig(os.path.join(OUTPUTS_DIR, "actual_vs_predicted.png"))
+    plt.close()
+
+    print("Charts created successfully.")
+
