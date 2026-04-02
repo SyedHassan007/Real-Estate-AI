@@ -286,3 +286,34 @@ def clean_and_engineer_data(df):
 
     return df
 
+
+
+# ============================================================
+# 4. SAVE TO EXCEL + CSV
+# ============================================================
+
+def save_excel_and_csv(raw_df, cleaned_df):
+    raw_csv_path = os.path.join(DATA_RAW_DIR, "dubai_real_estate_raw.csv")
+    cleaned_csv_path = os.path.join(DATA_CLEANED_DIR, "dubai_real_estate_cleaned.csv")
+    excel_path = os.path.join(DATA_CLEANED_DIR, "dubai_real_estate_master.xlsx")
+
+    raw_df.to_csv(raw_csv_path, index=False)
+    cleaned_df.to_csv(cleaned_csv_path, index=False)
+
+    with pd.ExcelWriter(excel_path, engine="xlsxwriter") as writer:
+        raw_df.to_excel(writer, sheet_name="properties_raw", index=False)
+        cleaned_df.to_excel(writer, sheet_name="properties_cleaned", index=False)
+
+        summary = cleaned_df.groupby(["Area", "Property_Type"]).agg(
+            Total_Listings=("Property_ID", "count"),
+            Avg_Sale_Price=("Sale_Price", "mean"),
+            Avg_Annual_Rent=("Annual_Rent", "mean"),
+            Avg_Rental_Yield=("Rental_Yield", "mean")
+        ).reset_index()
+        summary.to_excel(writer, sheet_name="summary_kpis", index=False)
+
+    print(f"Saved raw CSV: {raw_csv_path}")
+    print(f"Saved cleaned CSV: {cleaned_csv_path}")
+    print(f"Saved Excel workbook: {excel_path}")
+
+
