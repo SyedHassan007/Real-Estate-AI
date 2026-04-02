@@ -566,3 +566,34 @@ def create_charts(cleaned_df, predictions_df):
 
     print("Charts created successfully.")
 
+
+
+# ============================================================
+# 8. MAIN RUNNER
+# ============================================================
+
+def main():
+    print("Step 1: Generating synthetic Dubai real estate data...")
+    raw_df = generate_dubai_real_estate_data(n_rows=3000)
+
+    print("Step 2: Cleaning and engineering features...")
+    cleaned_df = clean_and_engineer_data(raw_df)
+
+    print("Step 3: Saving raw and cleaned files...")
+    save_excel_and_csv(raw_df, cleaned_df)
+
+    print("Step 4: Loading data into SQLite and exporting SQL summaries...")
+    load_into_sqlite(cleaned_df)
+
+    print("Step 5: Training ML model...")
+    results_df, predictions_df = train_model(cleaned_df)
+
+    print("Step 6: Creating charts...")
+    create_charts(cleaned_df, predictions_df)
+
+    print("\nProject execution completed successfully.")
+    print(f"\nCheck these folders:\n- data/\n- database/\n- models/\n- outputs/")
+
+
+if __name__ == "__main__":
+    main()
