@@ -374,3 +374,148 @@ def load_into_sqlite(cleaned_df):
     print("Saved SQL output CSV files for Power BI.")
 
 
+# ============================================================
+# 6. TRAIN ML MODEL
+# ============================================================
+
+def train_model(cleaned_df):
+    df = cleaned_df.copy()
+
+    feature_cols = [
+        "Area",
+        "Community",
+        "Property_Type",
+        "Developer",
+        "Bedrooms",
+        "Bathrooms",
+        "Size_SqFt",
+        "Floor_No",
+        "Parking_Spaces",
+        "Furnished",
+        "Handover_Status",
+        "Property_Age",
+        "Service_Charges",
+        "Distance_To_Metro",
+        "Distance_To_Downtown",
+        "Nearby_Schools",
+        "Nearby_Malls",
+        "Listing_Month",
+        "Premium_Location_Flag",
+        "Accessibility_Score",
+        "Neighborhood_Convenience_Score",
+    ]
+
+    target_col = "Sale_Price"
+
+    X = df[feature_cols]
+    y = df[target_col]
+
+    categorical_features = ["Area", "Community", "Property_Type", "Developer", "Furnished", "Handover_Status"]
+    numeric_features = [col for col in feature_cols if col not in categorical_features]
+
+    numeric_transformer = Pipeline(steps=[
+        ("imputer", SimpleImputer(strategy="median")),
+        ("scaler", StandardScaler())
+    ])
+
+    categorical_transformer = Pipeline(steps=[
+        ("imputer", SimpleImputer(strategy="most_frequent")),
+        ("onehot", OneHotEncoder(handle_unknown="ignore"))
+    ])
+
+    preprocessor = ColumnTransformer(transformers=[
+        ("num", numeric_transformer, numeric_features),
+        ("cat", categorical_transformer, categorical_features)
+    ])
+
+    # Split
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42
+    )
+
+    # Model 1
+    lr_pipeline = Pipeline(steps=[
+        ("preprocessor", preprocessor),
+        ("model", LinearRegression())
+    ])
+
+    lr_pipeline.fit(X_train, y_train)
+    lr_preds = lr_pipeline.predict(X_test)
+
+    # Model 2
+    rf_pipeline = Pipeline(steps=[
+        ("preprocessor", preprocessor),
+        ("model", RandomForestRegressor(
+            n_estimators=200,
+            max_depth=18,
+            min_samples_split=5,
+            min_samples_leaf=2,
+            random_state=42,
+            n_jobs=-1
+        ))
+    ])
+
+    rf_pipeline.fit(X_train, y_train)
+    rf_preds = rf_pipeline.predict(X_test)
+
+    def evaluate_model(name, actual, predicted):
+        mae = mean_absolute_error(actual, predicted)
+        rmse = mean_squared_error(actual, predicted) ** 0.5
+        r2 = r2_score(actual, predicted)
+        return {
+            "Model": name,
+            "MAE": round(mae, 2),
+            "RMSE": round(rmse, 2),
+            "R2_Score": round(r2, 4)
+        }
+
+    results = [
+        evaluate_model("Linear Regression", y_test, lr_preds),
+        evaluate_model("Random Forest", y_test, rf_preds)
+    ]
+
+    results_df = pd.DataFrame(results)
+    results_df.to_csv(os.path.join(OUTPUTS_DIR, "model_comparison.csv"), index=False)
+
+    # Use best model
+    best_model_name = results_df.sort_values(by="R2_Score", ascending=False).iloc[0]["Model"]
+    best_pipeline = rf_pipeline if best_model_name == "Random Forest" else lr_pipeline
+    best_preds = rf_preds if best_model_name == "Random Forest" else lr_preds
+
+    # Save model
+    model_path = os.path.join(MODELS_DIR, "best_sale_price_model.pkl")
+    joblib.dump(best_pipeline, model_path)
+
+    # Export predictions
+    predictions_df = X_test.copy()
+    predictions_df["Actual_Sale_Price"] = y_test.values
+    predictions_df["Predicted_Sale_Price"] = best_preds
+    predictions_df["Prediction_Error"] = predictions_df["Actual_Sale_Price"] - predictions_df["Predicted_Sale_Price"]
+    predictions_df.to_csv(os.path.join(DATA_PRED_DIR, "sale_price_predictions.csv"), index=False)
+
+    # Feature importance for RF only
+    if best_model_name == "Random Forest":
+        preprocessor_fitted = best_pipeline.named_steps["preprocessor"]
+        model_fitted = best_pipeline.named_steps["model"]
+
+        feature_names_num = numeric_features
+        feature_names_cat = preprocessor_fitted.named_transformers_["cat"] \
+            .named_steps["onehot"].get_feature_names_out(categorical_features)
+
+        all_feature_names = list(feature_names_num) + list(feature_names_cat)
+        importances = model_fitted.feature_importances_
+
+        feature_importance_df = pd.DataFrame({
+            "Feature": all_feature_names,
+            "Importance": importances
+        }).sort_values(by="Importance", ascending=False)
+
+        feature_importance_df.to_csv(os.path.join(OUTPUTS_DIR, "feature_importance.csv"), index=False)
+
+    print("Model training completed.")
+    print(results_df)
+    print(f"Best model saved at: {model_path}")
+
+    return results_df, predictions_df
+
+
